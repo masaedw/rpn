@@ -1,15 +1,14 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE ScopedTypeVariables #-}
---import Data.Conduit.Attoparsec
 import Control.Applicative ((<|>),(*>),(<*),(<$>),pure)
 import Data.Attoparsec.ByteString (Parser)
 import qualified Data.Attoparsec.ByteString as A
 import qualified Data.Attoparsec.Char8 as AC
 import qualified Data.ByteString.Char8 as B
+import Data.Conduit (($=),($$))
 import qualified Data.Conduit as C
 import qualified Data.Conduit.Binary as CB
 import qualified Data.Conduit.List as CL
-import Data.Conduit (($=),($$))
 import System.IO
 
 main :: IO ()
