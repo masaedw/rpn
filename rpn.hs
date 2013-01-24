@@ -1,6 +1,5 @@
 {-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE ScopedTypeVariables #-}
-import Control.Applicative ((<|>),(*>),(<*),(<$>),pure)
+import Control.Applicative ((<|>),(<*),(<$>))
 import Data.Attoparsec.ByteString (Parser)
 import qualified Data.Attoparsec.ByteString as A
 import qualified Data.Attoparsec.Char8 as AC
@@ -9,6 +8,7 @@ import Data.Conduit (($=),($$))
 import qualified Data.Conduit as C
 import qualified Data.Conduit.Binary as CB
 import qualified Data.Conduit.List as CL
+import Data.Functor ((<$))
 import System.IO
 
 main :: IO ()
@@ -33,7 +33,7 @@ rpnOp = ops [("+", Plus)
             ,("-", Minus)
             ,("*", Mul)
             ,("/", Div)]
-  where ops = A.choice . map (\(s::B.ByteString,v) -> A.string s *> pure v)
+  where ops = A.choice . map (\(s,v) -> v <$ A.string s)
 
 rpnValue :: Parser RPN
 rpnValue = Val <$> AC.double
