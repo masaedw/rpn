@@ -17,3 +17,7 @@ cabal-version:       >=1.8
 executable rpn
   main-is:             rpn.hs
   build-depends:       base ==4.5.*
+                       ,attoparsec
+                       ,attoparsec-conduit
+                       ,bytestring
+                       ,conduit
