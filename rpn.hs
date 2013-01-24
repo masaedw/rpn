@@ -16,14 +16,14 @@ main :: IO ()
 main = C.runResourceT
        $ CB.sourceHandle stdin
        $= CB.lines
-       $= CL.map ((`B.append` "\n") . B.pack . show . AC.parseOnly rpn)
+       $= CL.map ((`B.append` "\n") . B.pack . eval . AC.parseOnly rpn)
        $$ CB.sinkHandle stdout
 
 data RPN = Plus
          | Minus
          | Mul
          | Div
-         | Val Integer
+         | Val Double
          deriving (Show, Eq)
 
 rpn :: Parser [RPN]
@@ -37,4 +37,28 @@ rpnOp = ops [("+", Plus)
   where ops = A.choice . map (\(s::B.ByteString,v) -> A.string s *> pure v)
 
 rpnValue :: Parser RPN
-rpnValue = Val . toInteger <$> AC.decimal
+rpnValue = Val <$> AC.double
+
+eval :: Either String [RPN] -> String
+eval (Left msg) = "parse error: " ++ msg
+eval (Right rpns) = evalRPN rpns
+
+evalRPN :: [RPN] -> String
+evalRPN = eval' []
+  where
+    eval' :: [Double] -> [RPN] -> String
+    eval' [] [] = ""
+    eval' (x:_) [] = show x
+    eval' s (Val n:xr) = eval' (n:s) xr
+    eval' s (Plus:xr) = case s of
+      (a:b:xs) -> eval' (b+a:xs) xr
+      _ -> "empty stack"
+    eval' s (Minus:xr) = case s of
+      (a:b:xs) -> eval' (b-a:xs) xr
+      _ -> "empty stack"
+    eval' s (Mul:xr) = case s of
+      (a:b:xs) -> eval' (b*a:xs) xr
+      _ -> "empty stack"
+    eval' s (Div:xr) = case s of
+      (a:b:xs) -> eval' (a/b:xs) xr
+      _ -> "empty stack"
