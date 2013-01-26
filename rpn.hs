@@ -43,21 +43,11 @@ eval (Left msg) = "parse error: " ++ msg
 eval (Right rpns) = evalRPN rpns
 
 evalRPN :: [RPN] -> String
-evalRPN = eval' []
+evalRPN = show . head . foldl f []
   where
-    eval' :: [Double] -> [RPN] -> String
-    eval' [] [] = ""
-    eval' (x:_) [] = show x
-    eval' s (Val n:xr) = eval' (n:s) xr
-    eval' s (Plus:xr) = case s of
-      (a:b:xs) -> eval' (b+a:xs) xr
-      _ -> "empty stack"
-    eval' s (Minus:xr) = case s of
-      (a:b:xs) -> eval' (b-a:xs) xr
-      _ -> "empty stack"
-    eval' s (Mul:xr) = case s of
-      (a:b:xs) -> eval' (b*a:xs) xr
-      _ -> "empty stack"
-    eval' s (Div:xr) = case s of
-      (a:b:xs) -> eval' (a/b:xs) xr
-      _ -> "empty stack"
+    f s (Val n)      = n:s
+    f (a:b:xs) Plus  = (b + a):xs
+    f (a:b:xs) Minus = (b - a):xs
+    f (a:b:xs) Mul   = (b * a):xs
+    f (a:b:xs) Div   = (b / a):xs
+    f _ _            = error "empty stack"
